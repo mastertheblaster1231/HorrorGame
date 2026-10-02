@@ -16,6 +16,11 @@ AHorrorGameCharacter::AHorrorGameCharacter()
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
+	
+	/*Crouch Properties*/
+	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
+	GetCharacterMovement()->MaxWalkSpeedCrouched = crouchSpeed;
+	GetCharacterMovement()->CrouchedHalfHeight = crouchCapsuleHeight;
 		
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
@@ -56,15 +61,18 @@ void AHorrorGameCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
 		
 		// Jumping
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started,   this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
 		// Moving
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AHorrorGameCharacter::Move);
+		EnhancedInputComponent->BindAction(MoveAction,      ETriggerEvent::Triggered, this, &AHorrorGameCharacter::Move);
 		EnhancedInputComponent->BindAction(MouseLookAction, ETriggerEvent::Triggered, this, &AHorrorGameCharacter::Look);
 
 		// Looking
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AHorrorGameCharacter::Look);
+		EnhancedInputComponent->BindAction(LookAction,   ETriggerEvent::Triggered,this, &AHorrorGameCharacter::Look);
+		EnhancedInputComponent->BindAction(RunAction,    ETriggerEvent::Started,  this, &AHorrorGameCharacter::DoRun);
+		EnhancedInputComponent->BindAction(RunAction ,   ETriggerEvent::Completed,this, &AHorrorGameCharacter::DoRun);
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started,  this, &AHorrorGameCharacter::ToggleCrouch);
 	}
 	else
 	{
@@ -92,7 +100,7 @@ void AHorrorGameCharacter::Look(const FInputActionValue& Value)
 
 void AHorrorGameCharacter::DoMove(float Right, float Forward)
 {
-	if (GetController() != nullptr)
+	if (GetController() != nullptr)	
 	{
 		// find out which way is forward
 		const FRotator Rotation = GetController()->GetControlRotation();
@@ -130,4 +138,35 @@ void AHorrorGameCharacter::DoJumpEnd()
 {
 	// signal the character to stop jumping
 	StopJumping();
+}
+
+void AHorrorGameCharacter::DoRun()
+{
+	
+	if (!bIsRunning)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, TEXT("Running"));
+		GetCharacterMovement()->MaxWalkSpeed = runSpeed;
+		PlayerActionState = EPlayerCharacterState::Running;
+		
+	}else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, TEXT("StopRunning"));
+		GetCharacterMovement()->MaxWalkSpeed = walkSpeed; 
+		PlayerActionState = EPlayerCharacterState::Walking;
+	}
+	bIsRunning =!bIsRunning;
+	
+}
+
+void AHorrorGameCharacter::ToggleCrouch()
+{
+	if (bIsCrouched)
+	{
+		UnCrouch();
+	}else
+	{
+		Crouch();
+		GetCharacterMovement()->CrouchedHalfHeight = crouchCapsuleHeight;
+	}
 }

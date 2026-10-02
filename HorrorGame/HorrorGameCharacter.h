@@ -1,12 +1,11 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
+
+#include "Enums/EPlayerCharacter.h"
 #include "HorrorGameCharacter.generated.h"
-#include ""
 
 class USpringArmComponent;
 class UCameraComponent;
@@ -49,12 +48,41 @@ protected:
 	/** Mouse Look Input Action */
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* MouseLookAction;
+	
+	UPROPERTY(EditAnywhere, Category="Input")
+	UInputAction* RunAction;
+	
+	UPROPERTY(EditAnywhere, Category="Input")
+	UInputAction* CrouchAction;
 
 public:
 
 	/** Constructor */
 	AHorrorGameCharacter();	
-
+#pragma region CharacterMovement
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="CharacterMovement")
+	float walkSpeed     = 250.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="CharacterMovement")
+	float runSpeed      = 500.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="CharacterMovement")
+	float crouchSpeed   =  200.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="CharacterMovement")
+	float crouchCapsuleHeight= 60.0f;
+	
+#pragma endregion
+	
+#pragma region Start
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EPlayerCharacterState PlayerActionState;
+	
+#pragma  endregion 
+	
+	
 protected:
 
 	/** Initialize input action bindings */
@@ -85,6 +113,12 @@ public:
 	/** Handles jump pressed inputs from either controls or UI interfaces */
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void DoJumpEnd();
+	
+	UFUNCTION(BlueprintCallable, Category="Input")
+	virtual void DoRun();
+	
+	UFUNCTION(BlueprintCallable, Category="Input")
+	virtual void ToggleCrouch();
 
 public:
 
@@ -93,5 +127,8 @@ public:
 
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	
+private:
+	bool bIsRunning;
 };
 
