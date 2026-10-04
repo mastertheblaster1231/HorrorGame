@@ -14,6 +14,23 @@ UInteractionLineTrace::UInteractionLineTrace()
 	// ...
 }
 
+FHitResult UInteractionLineTrace::ShootTrace(const UObject* WorldContextObject, const FVector Start, const FVector End,
+	ETraceTypeQuery TraceChannel, bool bTraceComplex, const TArray<AActor*>& ActorsToIgnore,
+	EDrawDebugTrace::Type DrawDebugType, bool bIgnoreSelf)
+{
+	FHitResult HitResult;
+	UKismetSystemLibrary::LineTraceSingle(WorldContextObject, 
+		Start, 
+		End,
+		TraceChannel,
+		bTraceComplex,
+		ActorsToIgnore,
+		DrawDebugType,
+		HitResult,
+		bIgnoreSelf);
+	return HitResult;
+}
+
 
 // Called when the game starts
 void UInteractionLineTrace::BeginPlay()

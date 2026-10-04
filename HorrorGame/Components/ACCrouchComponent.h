@@ -15,6 +15,7 @@ class HORRORGAME_API UACCrouchComponent : public UActorComponent
 public:
 	// Sets default values for this component's properties
 	UACCrouchComponent();
+	
 
 protected:
 	// Called when the game starts

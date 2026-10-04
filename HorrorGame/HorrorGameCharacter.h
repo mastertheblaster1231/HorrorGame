@@ -3,14 +3,16 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
-
 #include "Enums/EPlayerCharacter.h"
+#include "GameActors/BasePickUpObject.h"
+#include "Structs/ItemStruct.h"
 #include "HorrorGameCharacter.generated.h"
 
 class USpringArmComponent;
 class UCameraComponent;
 class UInputAction;
 struct FInputActionValue;
+class UInteractionLineTrace;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
@@ -30,6 +32,7 @@ class AHorrorGameCharacter : public ACharacter
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
+
 	
 protected:
 
@@ -40,6 +43,18 @@ protected:
 	/** Move Input Action */
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* MoveAction;
+	
+	UPROPERTY(EditAnywhere, Category="Input")
+	UInputAction* RunAction;
+	
+	UPROPERTY(EditAnywhere, Category="Input")
+	UInputAction* CrouchAction;
+	
+	UPROPERTY(EditAnywhere, Category="Input")
+	UInputAction* InteractAction;
+	
+	UPROPERTY(EditAnywhere,Category="Input")
+	UInputAction* DetachAction;
 
 	/** Look Input Action */
 	UPROPERTY(EditAnywhere, Category="Input")
@@ -49,11 +64,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* MouseLookAction;
 	
-	UPROPERTY(EditAnywhere, Category="Input")
-	UInputAction* RunAction;
-	
-	UPROPERTY(EditAnywhere, Category="Input")
-	UInputAction* CrouchAction;
+
 
 public:
 
@@ -73,14 +84,39 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="CharacterMovement")
 	float crouchCapsuleHeight= 60.0f;
 	
+
+	
 #pragma endregion
+#pragma region Interactvariables
 	
-#pragma region Start
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Interact")
+	float lineTraceLength = 200.0f;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Interact", meta = (AllowPrivateAccess = "true"))
+	ABasePickUpObject* pickUpItem;
+		
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Interact")
+	TMap<FName, FItemProperties> InventoryObjectsMap;
+	
+	
+#pragma endregion 
+#pragma region EnumsRegion
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "AnimationStates")
 	EPlayerCharacterState PlayerActionState;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "AnimationStates")
+	EPlayersPresentWeapon PlayersPresentWeapon;
+	
+
+	
 #pragma  endregion 
+	
+#pragma region Components
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UInteractionLineTrace* InteractionLineTrace;
+#pragma endregion
 	
 	
 protected:
@@ -97,6 +133,9 @@ protected:
 	void Look(const FInputActionValue& Value);
 
 public:
+	
+	UFUNCTION(BlueprintCallable)
+	virtual void BeginPlay() override;
 
 	/** Handles move inputs from either controls or UI interfaces */
 	UFUNCTION(BlueprintCallable, Category="Input")
@@ -119,6 +158,12 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void ToggleCrouch();
+	
+	UFUNCTION(BlueprintCallable, Category="Input")
+	virtual void Interact();
+	
+	UFUNCTION(BlueprintCallable)
+	virtual void DetachPickedItem();
 
 public:
 

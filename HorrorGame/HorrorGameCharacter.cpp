@@ -11,17 +11,13 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "HorrorGame.h"
+#include "Components/InteractionLineTrace.h"
+#include "Interfaces/ItemInteract.h"
 
 AHorrorGameCharacter::AHorrorGameCharacter()
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
-	
-	/*Crouch Properties*/
-	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
-	GetCharacterMovement()->MaxWalkSpeedCrouched = crouchSpeed;
-	GetCharacterMovement()->CrouchedHalfHeight = crouchCapsuleHeight;
-		
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -50,6 +46,9 @@ AHorrorGameCharacter::AHorrorGameCharacter()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
+	
+	/*Components*/
+	InteractionLineTrace = CreateDefaultSubobject<UInteractionLineTrace>(TEXT("InteractionLineTrace"));
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
@@ -73,6 +72,12 @@ void AHorrorGameCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 		EnhancedInputComponent->BindAction(RunAction,    ETriggerEvent::Started,  this, &AHorrorGameCharacter::DoRun);
 		EnhancedInputComponent->BindAction(RunAction ,   ETriggerEvent::Completed,this, &AHorrorGameCharacter::DoRun);
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started,  this, &AHorrorGameCharacter::ToggleCrouch);
+		
+		//Interact
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent:: Started , this, &AHorrorGameCharacter::Interact);
+		
+		//Detach Item
+		EnhancedInputComponent->BindAction(DetachAction, ETriggerEvent::Triggered, this,  &AHorrorGameCharacter::DetachPickedItem);
 	}
 	else
 	{
@@ -96,6 +101,15 @@ void AHorrorGameCharacter::Look(const FInputActionValue& Value)
 
 	// route the input
 	DoLook(LookAxisVector.X, LookAxisVector.Y);
+}
+
+void AHorrorGameCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	/*Crouch Properties*/
+	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
+	GetCharacterMovement()->MaxWalkSpeedCrouched = crouchSpeed;
+	GetCharacterMovement()->CrouchedHalfHeight = crouchCapsuleHeight;
 }
 
 void AHorrorGameCharacter::DoMove(float Right, float Forward)
@@ -164,9 +178,69 @@ void AHorrorGameCharacter::ToggleCrouch()
 	if (bIsCrouched)
 	{
 		UnCrouch();
+		PlayerActionState = EPlayerCharacterState::Walking;
+		
 	}else
 	{
 		Crouch();
 		GetCharacterMovement()->CrouchedHalfHeight = crouchCapsuleHeight;
+		PlayerActionState = EPlayerCharacterState::Crouch;
 	}
 }
+
+void AHorrorGameCharacter::Interact()
+{
+	FVector playerCameraLocation;
+	FRotator playerCameraRotation;
+	
+	GetController()->GetPlayerViewPoint(playerCameraLocation, playerCameraRotation);
+	FVector endLocation = playerCameraLocation + playerCameraRotation.Vector()+( GetFollowCamera()->GetForwardVector()*lineTraceLength);
+	TArray<AActor*> IgnoreActors;
+	
+	if (GetWorld())
+	{
+		FHitResult HitResult = 
+			InteractionLineTrace->ShootTrace(GetWorld(), 
+		   playerCameraLocation, 
+		   endLocation,
+		   TraceTypeQuery1,
+		   false,
+		   IgnoreActors,
+		   EDrawDebugTrace::ForDuration,
+		   true
+		   );	
+		
+		if (HitResult.bBlockingHit)
+		{
+			AActor* hitActor = HitResult.GetActor();
+			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red,  FString::Printf(TEXT("%s"), *HitResult.GetActor()->GetName()));
+			if (hitActor->GetClass()->ImplementsInterface(UItemInteract::StaticClass()))
+			{
+				IItemInteract::Execute_InteractItem(hitActor, this);
+			}
+		}
+	}
+}
+
+void AHorrorGameCharacter::DetachPickedItem()
+{
+	if (pickUpItem!=nullptr)
+	{
+		for (const auto& Item :InventoryObjectsMap)
+		{
+			FName itemKey = Item.Key;
+			
+			if (pickUpItem->ItemProperties.itemName == Item.Value.itemName)
+			{
+				if (pickUpItem->GetClass()->ImplementsInterface(UItemInteract::StaticClass()))
+				{
+					IItemInteract::Execute_InteractItem(pickUpItem, this);
+					pickUpItem = nullptr;
+				}
+				InventoryObjectsMap.Remove(itemKey);
+				break;
+			}
+		}
+	}
+}
+		

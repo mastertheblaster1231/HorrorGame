@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "InteractionLineTrace.generated.h"
 
 
@@ -15,6 +16,16 @@ class HORRORGAME_API UInteractionLineTrace : public UActorComponent
 public:
 	// Sets default values for this component's properties
 	UInteractionLineTrace();
+	
+	FHitResult ShootTrace(const UObject* WorldContextObject,
+const FVector Start,
+const FVector End,
+ETraceTypeQuery TraceChannel,
+bool bTraceComplex,
+const TArray< AActor* >& ActorsToIgnore, 
+EDrawDebugTrace::Type DrawDebugType,
+bool bIgnoreSelf);
+
 
 protected:
 	// Called when the game starts
