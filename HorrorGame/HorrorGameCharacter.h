@@ -96,7 +96,7 @@ public:
 	ABasePickUpObject* pickUpItem;
 		
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Interact")
-	TMap<FName, FItemProperties> InventoryObjectsMap;
+	TMap<FName, ABasePickUpObject*> InventoryObjectsMap;
 	
 	
 #pragma endregion 
@@ -158,7 +158,8 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void ToggleCrouch();
-	
+	void InteractFunction();
+
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void Interact();
 	

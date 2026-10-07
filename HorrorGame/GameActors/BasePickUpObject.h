@@ -18,7 +18,11 @@ class HORRORGAME_API ABasePickUpObject : public AActor, public IItemInteract
 public:
 	// Sets default values for this actor's properties
 	ABasePickUpObject();
-	
+	UFUNCTION(BlueprintCallable)
+	void AttachPickedActor(AHorrorGameCharacter* playerCharacter);
+	UFUNCTION(BlueprintCallable)
+	void DetachPickedActor(AHorrorGameCharacter* playerCharacter);
+
 	UFUNCTION()
 	virtual void InteractItem_Implementation(AHorrorGameCharacter* playerCharacter) override;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

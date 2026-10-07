@@ -17,48 +17,48 @@ ABasePickUpObject::ABasePickUpObject()
 	itemInteractionZone->SetupAttachment(itemMesh);
 }
 
-void ABasePickUpObject::InteractItem_Implementation(AHorrorGameCharacter* playerCharacter)
-{
-	IItemInteract::InteractItem_Implementation(playerCharacter);
-	
-	if (!bisPicked)
+	void ABasePickUpObject::AttachPickedActor(AHorrorGameCharacter* playerCharacter)
 	{
-		if (refPlayerCharacter)
+		if (playerCharacter)
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red,  FString::Printf(TEXT("Pick Up Working")));
 			bisPicked = true;
-			refPlayerCharacter->InventoryObjectsMap.FindOrAdd( ItemProperties.itemName,  ItemProperties);
 			FAttachmentTransformRules AttachmentRules = FAttachmentTransformRules::SnapToTargetNotIncludingScale;
 			this->itemMesh->SetSimulatePhysics(false);
 			this->SetActorEnableCollision(false);
 			this->SetActorScale3D(pickedItemScale);
-			this->AttachToComponent(refPlayerCharacter->GetMesh(), AttachmentRules, ItemProperties.socketName);
-			refPlayerCharacter->pickUpItem = this;
-		
-		}else
-		{
-			refPlayerCharacter = Cast<AHorrorGameCharacter>(playerCharacter);
-			InteractItem_Implementation(refPlayerCharacter);
+			playerCharacter->InventoryObjectsMap.FindOrAdd( ItemProperties.itemName, this);
+			this->AttachToComponent(playerCharacter->GetMesh(), AttachmentRules, ItemProperties.socketName);
+			playerCharacter->pickUpItem = this; 
 		}
-		
-	}else
+	}
+
+	void ABasePickUpObject::DetachPickedActor(AHorrorGameCharacter* playerCharacter)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red,  FString::Printf(TEXT("Detaching Working")));
+		
 		bisPicked = false;
+		playerCharacter->pickUpItem = nullptr;
+	this->itemMesh->SetVisibility(true);
 		FDetachmentTransformRules DetachmentTransformRules = FDetachmentTransformRules::KeepRelativeTransform;
 		this->DetachFromActor(DetachmentTransformRules);
 		this->itemMesh->SetSimulatePhysics(true);
 		this->SetActorScale3D(normalItemScale);
 		this->SetActorEnableCollision(true);
 	}
-	
-}
+
+	void ABasePickUpObject::InteractItem_Implementation(AHorrorGameCharacter* playerCharacter)
+	{
+		IItemInteract::InteractItem_Implementation(playerCharacter);
+		
+		  AttachPickedActor(playerCharacter);
+		
+	}
 
 // Called when the game starts or when spawned
 void ABasePickUpObject::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame

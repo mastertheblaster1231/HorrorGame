@@ -1,7 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "HorrorGameCharacter.h"
-#include "Engine/LocalPlayer.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -77,7 +76,7 @@ void AHorrorGameCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent:: Started , this, &AHorrorGameCharacter::Interact);
 		
 		//Detach Item
-		EnhancedInputComponent->BindAction(DetachAction, ETriggerEvent::Triggered, this,  &AHorrorGameCharacter::DetachPickedItem);
+		EnhancedInputComponent->BindAction(DetachAction, ETriggerEvent::Started, this,  &AHorrorGameCharacter::DetachPickedItem);
 	}
 	else
 	{
@@ -154,7 +153,7 @@ void AHorrorGameCharacter::DoJumpEnd()
 	StopJumping();
 }
 
-void AHorrorGameCharacter::DoRun()
+void AHorrorGameCharacter::DoRun()	
 {
 	
 	if (!bIsRunning)
@@ -188,7 +187,7 @@ void AHorrorGameCharacter::ToggleCrouch()
 	}
 }
 
-void AHorrorGameCharacter::Interact()
+void AHorrorGameCharacter::InteractFunction()
 {
 	FVector playerCameraLocation;
 	FRotator playerCameraRotation;
@@ -201,14 +200,14 @@ void AHorrorGameCharacter::Interact()
 	{
 		FHitResult HitResult = 
 			InteractionLineTrace->ShootTrace(GetWorld(), 
-		   playerCameraLocation, 
-		   endLocation,
-		   TraceTypeQuery1,
-		   false,
-		   IgnoreActors,
-		   EDrawDebugTrace::ForDuration,
-		   true
-		   );	
+			                                 playerCameraLocation, 
+			                                 endLocation,
+			                                 TraceTypeQuery1,
+			                                 false,
+			                                 IgnoreActors,
+			                                 EDrawDebugTrace::ForDuration,
+			                                 true
+			);	
 		
 		if (HitResult.bBlockingHit)
 		{
@@ -222,25 +221,55 @@ void AHorrorGameCharacter::Interact()
 	}
 }
 
+void AHorrorGameCharacter::Interact()
+{
+	if(pickUpItem == nullptr)
+	{
+		InteractFunction();
+	}else
+	{
+		pickUpItem->itemMesh->SetVisibility(false);
+		InteractFunction();
+		/*DetachPickedItem();
+		Interact();*/
+	}
+}
+
 void AHorrorGameCharacter::DetachPickedItem()
 {
-	if (pickUpItem!=nullptr)
+	GEngine->AddOnScreenDebugMessage(
+	-1,
+	3.f,
+	FColor::Yellow,
+	TEXT("X DETACH CALLED")
+);
+	if (!pickUpItem) return;
+	TArray<FName> inventoryObjectsNames;
+	//TArray<ABasePickUpObject*> inventoryActorObjects;
+	InventoryObjectsMap.GetKeys(inventoryObjectsNames);
+	//InventoryObjectsMap.GenerateValueArray(inventoryActorObjects);
+	int32  itemIndex =INDEX_NONE;
+	
+	if (pickUpItem!=nullptr)	
 	{
-		for (const auto& Item :InventoryObjectsMap)
+		for (const auto& Item : InventoryObjectsMap)
 		{
-			FName itemKey = Item.Key;
-			
-			if (pickUpItem->ItemProperties.itemName == Item.Value.itemName)
+			if (Item.Key == pickUpItem->ItemProperties.itemName)
 			{
-				if (pickUpItem->GetClass()->ImplementsInterface(UItemInteract::StaticClass()))
-				{
-					IItemInteract::Execute_InteractItem(pickUpItem, this);
-					pickUpItem = nullptr;
-				}
-				InventoryObjectsMap.Remove(itemKey);
-				break;
+				itemIndex =inventoryObjectsNames.Find(Item.Key);	
+				pickUpItem->DetachPickedActor(this);
+				InventoryObjectsMap.Remove(Item.Key);
+				break;	
+			}
+		}
+		if (pickUpItem == nullptr && itemIndex >0 )
+		{
+			--itemIndex;
+			FName itemIndexReferenceName = inventoryObjectsNames[itemIndex];
+			if (ABasePickUpObject** newPickUpItem = InventoryObjectsMap.Find(itemIndexReferenceName)){//used Dereference Operator
+				pickUpItem = *newPickUpItem;
+				pickUpItem->AttachPickedActor(this);
 			}
 		}
 	}
 }
-		
