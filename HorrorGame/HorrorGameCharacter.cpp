@@ -212,11 +212,21 @@ void AHorrorGameCharacter::InteractFunction()
 		if (HitResult.bBlockingHit)
 		{
 			AActor* hitActor = HitResult.GetActor();
-			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red,  FString::Printf(TEXT("%s"), *HitResult.GetActor()->GetName()));
 			if (hitActor->GetClass()->ImplementsInterface(UItemInteract::StaticClass()))
 			{
+				
+				if (pickUpItem != nullptr)
+				{
+					pickUpItem->itemMesh->SetVisibility(false);
+				}
+				
 				IItemInteract::Execute_InteractItem(hitActor, this);
+				GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red,  FString::Printf(TEXT("%s"), *HitResult.GetActor()->GetName()));
 			}
+		}else
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red,  FString::Printf(TEXT("Hitted Nothing!!")));
+			
 		}
 	}
 }
@@ -228,7 +238,7 @@ void AHorrorGameCharacter::Interact()
 		InteractFunction();
 	}else
 	{
-		pickUpItem->itemMesh->SetVisibility(false);
+		
 		InteractFunction();
 		/*DetachPickedItem();
 		Interact();*/
@@ -269,6 +279,7 @@ void AHorrorGameCharacter::DetachPickedItem()
 			if (ABasePickUpObject** newPickUpItem = InventoryObjectsMap.Find(itemIndexReferenceName)){//used Dereference Operator
 				pickUpItem = *newPickUpItem;
 				pickUpItem->AttachPickedActor(this);
+				pickUpItem->itemMesh->SetVisibility(true);
 			}
 		}
 	}

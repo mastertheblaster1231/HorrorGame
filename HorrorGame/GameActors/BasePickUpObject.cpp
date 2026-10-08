@@ -39,7 +39,7 @@ ABasePickUpObject::ABasePickUpObject()
 		
 		bisPicked = false;
 		playerCharacter->pickUpItem = nullptr;
-	this->itemMesh->SetVisibility(true);
+	    this->itemMesh->SetVisibility(true);
 		FDetachmentTransformRules DetachmentTransformRules = FDetachmentTransformRules::KeepRelativeTransform;
 		this->DetachFromActor(DetachmentTransformRules);
 		this->itemMesh->SetSimulatePhysics(true);
