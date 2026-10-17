@@ -1,6 +1,7 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "EPlayerCharacter.generated.h"
+
 UENUM(BlueprintType)
 enum class EPlayerCharacterState : uint8
 {
@@ -19,5 +20,4 @@ enum class EPlayersPresentWeapon: uint8
 	Pistol     UMETA(DisplayName = "Pistol"),
 	ShotGun    UMETA(DisplayName = "ShotGun"),
 	MachineGun UMETA(DisplayName = "MachineGun")
-	
 };

@@ -10,6 +10,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "HorrorGame.h"
+#include "Components/ClimbComponent.h"
 #include "Components/InteractionLineTrace.h"
 #include "Interfaces/ItemInteract.h"
 
@@ -48,6 +49,7 @@ AHorrorGameCharacter::AHorrorGameCharacter()
 	
 	/*Components*/
 	InteractionLineTrace = CreateDefaultSubobject<UInteractionLineTrace>(TEXT("InteractionLineTrace"));
+	ClimbComponent       = CreateDefaultSubobject<UClimbComponent>      (TEXT("ClimbComponent"));
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
@@ -60,10 +62,12 @@ void AHorrorGameCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 		
 		// Jumping
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started,   this, &ACharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started,   this, &AHorrorGameCharacter::ClimbToWalk);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
 		// Moving
 		EnhancedInputComponent->BindAction(MoveAction,      ETriggerEvent::Triggered, this, &AHorrorGameCharacter::Move);
+		EnhancedInputComponent->BindAction(MoveAction ,  ETriggerEvent::Completed, this, &AHorrorGameCharacter::stopClimbingInput);
 		EnhancedInputComponent->BindAction(MouseLookAction, ETriggerEvent::Triggered, this, &AHorrorGameCharacter::Look);
 
 		// Looking
@@ -88,9 +92,22 @@ void AHorrorGameCharacter::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
-
-	// route the input
-	DoMove(MovementVector.X, MovementVector.Y);
+	
+	if (PlayerActionState == EPlayerCharacterState::Climbing)
+	{
+		if (ClimbComponent)
+		{
+			
+			ClimbComponent->climbInputvalue  = (MovementVector.Y);
+			ClimbComponent->tickClimbComponent(MovementVector.Y);
+		}
+	}else
+	{
+		// route the input
+		DoMove(MovementVector.X, MovementVector.Y);
+		
+	}
+	
 }
 
 void AHorrorGameCharacter::Look(const FInputActionValue& Value)
@@ -106,9 +123,10 @@ void AHorrorGameCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	/*Crouch Properties*/
+	PlayerActionState = EPlayerCharacterState::None;
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
 	GetCharacterMovement()->MaxWalkSpeedCrouched = crouchSpeed;
-	GetCharacterMovement()->CrouchedHalfHeight = crouchCapsuleHeight;
+	GetCharacterMovement()->SetCrouchedHalfHeight(crouchCapsuleHeight);	
 }
 
 void AHorrorGameCharacter::DoMove(float Right, float Forward)
@@ -206,8 +224,8 @@ void AHorrorGameCharacter::InteractFunction()
 			                                 false,
 			                                 IgnoreActors,
 			                                 EDrawDebugTrace::ForDuration,
-			                                 true
-			);	
+			                                 true,
+			                                 this);	
 		
 		if (HitResult.bBlockingHit)
 		{
@@ -231,6 +249,34 @@ void AHorrorGameCharacter::InteractFunction()
 	}
 }
 
+void AHorrorGameCharacter::stopClimbingInput()
+{
+	if (PlayerActionState == EPlayerCharacterState::Climbing)
+	{
+		if (ClimbComponent)
+		{
+			
+			ClimbComponent->climbInputvalue =0;
+			
+		}
+	}
+	
+}
+
+void AHorrorGameCharacter::ClimbToWalk()
+{
+	if (PlayerActionState == EPlayerCharacterState::Climbing)
+	{
+		if (ClimbComponent)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, TEXT("Out of box in new Function"),true);
+			
+		
+				ClimbComponent->StopClimbing(); 
+		}
+	}
+}
+
 void AHorrorGameCharacter::Interact()
 {
 	if(pickUpItem == nullptr)
@@ -240,8 +286,7 @@ void AHorrorGameCharacter::Interact()
 	{
 		
 		InteractFunction();
-		/*DetachPickedItem();
-		Interact();*/
+		
 	}
 }
 

@@ -2,6 +2,9 @@
 
 
 #include "InteractionLineTrace.h"
+#include "ClimbComponent.h"
+#include "HorrorGameCharacter.h"
+#include "GameActors/BaseActionObjects.h"
 
 
 // Sets default values for this component's properties
@@ -16,7 +19,7 @@ UInteractionLineTrace::UInteractionLineTrace()
 
 FHitResult UInteractionLineTrace::ShootTrace(const UObject* WorldContextObject, const FVector Start, const FVector End,
 	ETraceTypeQuery TraceChannel, bool bTraceComplex, const TArray<AActor*>& ActorsToIgnore,
-	EDrawDebugTrace::Type DrawDebugType, bool bIgnoreSelf)
+	EDrawDebugTrace::Type DrawDebugType, bool bIgnoreSelf , ACharacter* character)
 {
 	FHitResult HitResult;
 	UKismetSystemLibrary::LineTraceSingle(WorldContextObject, 
@@ -28,9 +31,52 @@ FHitResult UInteractionLineTrace::ShootTrace(const UObject* WorldContextObject, 
 		DrawDebugType,
 		HitResult,
 		bIgnoreSelf);
+	if (HitResult.bBlockingHit)
+	{
+		ABaseActionObjects* Object = Cast<ABaseActionObjects>(HitResult.GetActor());
+		if (Object)
+		{
+			Object->InteractPhysicalObject_Implementation();
+			if (Object->bisInteracting)
+			{
+				switch (Object->objectInteractionType)
+				{
+				case EItemActionType::Climb :
+					{
+						UClimbComponent* climbComponent =character->FindComponentByClass<UClimbComponent>();
+						if (character &&  climbComponent)
+						{
+							GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, TEXT(" INteraction Workking"),true);
+							climbComponent->ladderObject = Object;
+							climbComponent->ladderheight = Object->GetActorScale().Z*100.0;
+							climbComponent->StartClimbing();
+						}
+						break;
+					}
+					
+					default:
+					break;
+				}
+	
+			}
+		}	
+	}
+	
 	return HitResult;
 }
 
+
+/*ACharacter* UInteractionLineTrace::CharacterReference()
+{
+	/*if (AHorrorGameCharacter* playerCharacter = Cast<AHorrorGameCharacter>(GetOwner()))
+	{
+		
+		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, TEXT("Its Working"),true);
+			
+		return playerCharacter;
+	}
+	return nullptr;#1#
+}*/
 
 // Called when the game starts
 void UInteractionLineTrace::BeginPlay()
@@ -48,6 +94,5 @@ void UInteractionLineTrace::TickComponent(float DeltaTime, ELevelTick TickType,
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+	// ..
 }
-

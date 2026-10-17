@@ -33,6 +33,8 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FTransform itemTransformation;
+
+	
 	
 #pragma region ObjectProperties
 	

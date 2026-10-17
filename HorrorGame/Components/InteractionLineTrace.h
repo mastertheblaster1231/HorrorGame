@@ -24,9 +24,16 @@ ETraceTypeQuery TraceChannel,
 bool bTraceComplex,
 const TArray< AActor* >& ActorsToIgnore, 
 EDrawDebugTrace::Type DrawDebugType,
-bool bIgnoreSelf);
+bool bIgnoreSelf,
+ ACharacter* character
+ );
 
+ UPROPERTY(VisibleAnywhere)
+	ACharacter* InteractedCharacter;
 
+	/*FUNCTION()
+	ACharacter* CharacterReference();*/
+	
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;

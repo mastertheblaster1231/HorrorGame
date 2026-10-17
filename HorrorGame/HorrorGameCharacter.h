@@ -5,7 +5,6 @@
 #include "Logging/LogMacros.h"
 #include "Enums/EPlayerCharacter.h"
 #include "GameActors/BasePickUpObject.h"
-#include "Structs/ItemStruct.h"
 #include "HorrorGameCharacter.generated.h"
 
 class USpringArmComponent;
@@ -13,6 +12,7 @@ class UCameraComponent;
 class UInputAction;
 struct FInputActionValue;
 class UInteractionLineTrace;
+class UClimbComponent;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
@@ -116,6 +116,9 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UInteractionLineTrace* InteractionLineTrace;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UClimbComponent* ClimbComponent;
 #pragma endregion
 	
 	
@@ -159,6 +162,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void ToggleCrouch();
 	void InteractFunction();
+	
+	UFUNCTION(BlueprintCallable, Category="Input")
+	void stopClimbingInput();
+	
+	UFUNCTION(BlueprintCallable, Category="Input")
+	void ClimbToWalk();
 
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void Interact();
