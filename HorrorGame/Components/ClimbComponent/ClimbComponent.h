@@ -8,7 +8,7 @@
 
 struct FInputActionValue;
 class ABaseActionObjects;
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), Blueprintable)
 
 class HORRORGAME_API UClimbComponent : public UActorComponent
 {
@@ -28,7 +28,10 @@ public:
 	void StartClimbing();
 	UFUNCTION(BlueprintCallable, Category = "Interaction")
 	void StopClimbing();
-		
+	
+	UFUNCTION(BlueprintNativeEvent,BlueprintCallable, Category = "Interaction")
+	void ClimbLedge(FVector ClimbLocation);
+	
 	UFUNCTION(BlueprintCallable, Category = "Interaction")
 	void tickClimbComponent(float forwardValue);
 	

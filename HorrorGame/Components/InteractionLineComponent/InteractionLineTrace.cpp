@@ -2,7 +2,7 @@
 
 
 #include "InteractionLineTrace.h"
-#include "ClimbComponent.h"
+#include "Components/ClimbComponent/ClimbComponent.h"
 #include "HorrorGameCharacter.h"
 #include "GameActors/BaseActionObjects.h"
 

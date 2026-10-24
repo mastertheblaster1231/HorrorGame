@@ -10,12 +10,12 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "HorrorGame.h"
-#include "Components/ClimbComponent.h"
-#include "Components/InteractionLineTrace.h"
+#include "Components/ClimbComponent/ClimbComponent.h"
+#include "Components/InteractionLineComponent/InteractionLineTrace.h"
 #include "Interfaces/ItemInteract.h"
 
 AHorrorGameCharacter::AHorrorGameCharacter()
-{
+{	
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 	// Don't rotate when the controller rotates. Let that just affect the camera.
@@ -49,11 +49,13 @@ AHorrorGameCharacter::AHorrorGameCharacter()
 	
 	/*Components*/
 	InteractionLineTrace = CreateDefaultSubobject<UInteractionLineTrace>(TEXT("InteractionLineTrace"));
+	/*
 	ClimbComponent       = CreateDefaultSubobject<UClimbComponent>      (TEXT("ClimbComponent"));
+	*/
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
-}
+}	
 
 void AHorrorGameCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -95,11 +97,12 @@ void AHorrorGameCharacter::Move(const FInputActionValue& Value)
 	
 	if (PlayerActionState == EPlayerCharacterState::Climbing)
 	{
-		if (ClimbComponent)
+		if (climbComponentRef)
 		{
 			
-			ClimbComponent->climbInputvalue  = (MovementVector.Y);
+			ClimbComponent->climbInputvalue  =(MovementVector.Y);
 			ClimbComponent->tickClimbComponent(MovementVector.Y);
+			
 		}
 	}else
 	{
@@ -126,7 +129,8 @@ void AHorrorGameCharacter::BeginPlay()
 	PlayerActionState = EPlayerCharacterState::None;
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
 	GetCharacterMovement()->MaxWalkSpeedCrouched = crouchSpeed;
-	GetCharacterMovement()->SetCrouchedHalfHeight(crouchCapsuleHeight);	
+	GetCharacterMovement()->SetCrouchedHalfHeight(crouchCapsuleHeight);
+	ClimbComponent = FindComponentByClass<UClimbComponent>();
 }
 
 void AHorrorGameCharacter::DoMove(float Right, float Forward)

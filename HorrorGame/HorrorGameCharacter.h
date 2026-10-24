@@ -119,6 +119,9 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UClimbComponent* ClimbComponent;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<UClimbComponent> climbComponentRef;
 #pragma endregion
 	
 	

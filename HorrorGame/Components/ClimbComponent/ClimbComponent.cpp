@@ -2,10 +2,10 @@
 
 
 #include "ClimbComponent.h"
-#include "InputActionValue.h"
 #include "HorrorGameCharacter.h"
 #include "GameActors/BaseActionObjects.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 
 // Sets default values for this component's properties
@@ -72,6 +72,15 @@ void UClimbComponent::StopClimbing()
 	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, TEXT("Out of box	"),true);
 }
 
+void UClimbComponent::ClimbLedge_Implementation(FVector ClimbLocation)
+{
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green,
+			FString::Printf(TEXT("ClimbLedge running in: %s"), *GetClass()->GetName()));
+	}
+}
+
 void UClimbComponent::tickClimbComponent(float forwardValue)
 {
 		if (!ladderObject ||forwardValue == 0.f)  
@@ -87,8 +96,24 @@ void UClimbComponent::tickClimbComponent(float forwardValue)
 	{
 		if (ladderheight < playerCharacter->GetActorLocation().Z)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Black,FString::Printf(TEXT("Kinda Intresting you know")),true);
+			FVector startLocation  = playerCharacter->GetActorLocation()+ playerCharacter->GetActorForwardVector()*60.f+ playerCharacter->GetActorUpVector()*100;
+			FVector endLocation = startLocation + (startLocation.UpVector* -100);
+			TArray<AActor*> ignoreActors;
+			FHitResult hitResult;	
 			
+			UKismetSystemLibrary::LineTraceSingle(GetWorld() , startLocation, 
+				endLocation,
+				TraceTypeQuery1,
+				false,
+				ignoreActors,
+				EDrawDebugTrace::ForDuration,
+				hitResult,
+				true);
+			
+			if (hitResult.bBlockingHit)
+			{
+				ClimbLedge(hitResult.ImpactPoint);
+			}
 		}
 	}
 		
