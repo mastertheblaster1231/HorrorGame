@@ -1,41 +1,48 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AmmoStruct.h" // Replace with the header containing EAmmoType
+#include "Enums/GunAmmo.h" // Replace with the header containing EAmmoType
 #include "GunData.generated.h"
 
+USTRUCT(BlueprintType)
 struct FGunData
 {
     GENERATED_BODY()
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
+    FName GunSocketName;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
+    FTransform GunTransform;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
-    FName GunName = NAME_None;
+    FName GunName;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
-    float Damage = 20.0f;
+    float Damage ;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
-    float Range = 10000.0f;
+    float Range ;
 
     // Time between shots, in seconds
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
-    float FireRate = 0.2f;
+    float FireRate;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
-    int32 MagazineSize = 12;
+    int32 MagazineSize;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
-    float ReloadTime = 1.5f;
+    float ReloadTime ;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
-    EAmmoType AmmoType = EAmmoType::PistolAmmo;
+     EGunAmmoType AmmoType = EGunAmmoType::None;
+     
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
+    float Spread;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
-    float Spread = 1.0f;
+    int32 PelletsPerShot;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
-    int32 PelletsPerShot = 1;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
-    bool bAutomatic = false;
+    bool bAutomatic ;
 };

@@ -4,10 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Structs/GunData.h"
 #include "PlayerGunComponent.generated.h"
 
-
+struct FGunData;
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+
 class HORRORGAME_API UPlayerGunComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -24,7 +26,9 @@ public:
 	
 	UPROPERTY(EditAnywhere)
 	USkeletalMeshComponent* thirdGunComponent;
-
+	
+	UPROPERTY(VisibleAnywhere)
+	FGunData MainGunData ;
 
 	
 protected:

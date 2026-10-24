@@ -12,6 +12,7 @@
 #include "HorrorGame.h"
 #include "Components/ClimbComponent/ClimbComponent.h"
 #include "Components/InteractionLineComponent/InteractionLineTrace.h"
+#include "Components/PlayerGunComponent/PlayerGunComponent.h"
 #include "Interfaces/ItemInteract.h"
 
 AHorrorGameCharacter::AHorrorGameCharacter()
@@ -130,7 +131,9 @@ void AHorrorGameCharacter::BeginPlay()
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
 	GetCharacterMovement()->MaxWalkSpeedCrouched = crouchSpeed;
 	GetCharacterMovement()->SetCrouchedHalfHeight(crouchCapsuleHeight);
+	
 	ClimbComponent = FindComponentByClass<UClimbComponent>();
+	playerGunManager = FindComponentByClass<UPlayerGunComponent>();
 }
 
 void AHorrorGameCharacter::DoMove(float Right, float Forward)

@@ -13,6 +13,7 @@ class UInputAction;
 struct FInputActionValue;
 class UInteractionLineTrace;
 class UClimbComponent;
+class UPlayerGunComponent;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
@@ -121,7 +122,11 @@ public:
 	UClimbComponent* ClimbComponent;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPlayerGunComponent* playerGunManager;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UClimbComponent> climbComponentRef;
+	
 #pragma endregion
 	
 	

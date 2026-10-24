@@ -10,6 +10,11 @@ UPlayerGunComponent::UPlayerGunComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
+	
+	mainGunComponent =CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Main_Gun"));
+	secondGunComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Second_Gun"));
+	thirdGunComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Third_Gun"));
+	
 
 	// ...
 }
