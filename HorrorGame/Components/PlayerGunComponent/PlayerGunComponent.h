@@ -8,7 +8,7 @@
 #include "PlayerGunComponent.generated.h"
 
 struct FGunData;
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), Blueprintable)
 
 class HORRORGAME_API UPlayerGunComponent : public UActorComponent
 {
@@ -17,6 +17,7 @@ class HORRORGAME_API UPlayerGunComponent : public UActorComponent
 public:
 	// Sets default values for this component's properties
 	UPlayerGunComponent();
+	
 	
 	UPROPERTY(EditAnywhere)
 	USkeletalMeshComponent* mainGunComponent;
@@ -28,7 +29,7 @@ public:
 	USkeletalMeshComponent* thirdGunComponent;
 	
 	UPROPERTY(VisibleAnywhere)
-	FGunData MainGunData ;
+	FGunData MainGunData	;
 
 	
 protected:

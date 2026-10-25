@@ -65,19 +65,6 @@ FHitResult UInteractionLineTrace::ShootTrace(const UObject* WorldContextObject, 
 	return HitResult;
 }
 
-
-/*ACharacter* UInteractionLineTrace::CharacterReference()
-{
-	/*if (AHorrorGameCharacter* playerCharacter = Cast<AHorrorGameCharacter>(GetOwner()))
-	{
-		
-		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, TEXT("Its Working"),true);
-			
-		return playerCharacter;
-	}
-	return nullptr;#1#
-}*/
-
 // Called when the game starts
 void UInteractionLineTrace::BeginPlay()
 {
